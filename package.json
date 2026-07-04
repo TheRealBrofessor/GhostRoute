@@ -1,0 +1,23 @@
+{
+  "name": "ghostroute",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GhostRoute — privacy-first navigation with safety-aware route scoring",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace packages/scoring && npm run build --workspace apps/backend --if-present",
+    "lint": "npm run build --workspace packages/scoring && npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "dev:backend": "npm run dev --workspace apps/backend",
+    "dev:mobile": "npm run start --workspace apps/mobile"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

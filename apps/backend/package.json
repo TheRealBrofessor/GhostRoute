@@ -1,0 +1,28 @@
+{
+  "name": "@ghostroute/backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "GhostRoute API — route proposals and ephemeral Emergency Share sessions",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ghostroute/scoring": "*",
+    "@fastify/rate-limit": "^9.1.0",
+    "fastify": "^4.28.1",
+    "fastify-plugin": "^4.5.1",
+    "ioredis": "^5.4.1",
+    "pino": "^9.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "tsx": "^4.15.7",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  }
+}

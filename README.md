@@ -1,74 +1,81 @@
 # GhostRoute
 
-GhostRoute is a navigation-first mobile application that records real-world trips and provides live, passive efficiency analytics using personal route references.
+GhostRoute is a privacy-first navigation app that scores routes on safety and comfort, not just speed. Instead of a single "fastest" path, GhostRoute proposes 2-3 routes and explains *why* each one is Fastest, Balanced, or Safest — using lighting proxies, path type, openness, and road-network data, with full transparency about confidence when underlying map data is incomplete.
 
-The app is designed with the same safety posture as modern navigation apps (e.g., Waze and Google Maps). During navigation, GhostRoute may optionally display a small, non-interactive reference marker and an efficiency delta for situational awareness. All interpretation, comparisons, rewards, and insights are shown only after the drive is complete.
-
-GhostRoute does **not** encourage racing, speeding, or competitive driving. Its purpose is to help users understand route consistency, efficiency, and improvement over time in a safe and privacy-respecting way.
+GhostRoute has no accounts, no third-party analytics, and no ad SDKs. Trip history is off by default, stored only on-device and encrypted. The only server-side state is short-lived Emergency Share sessions, capped at 12 hours and never persisted after expiry.
 
 ---
 
 ## Core Principles
 
-- **Navigation-first UX**
-- **Low-distraction design**
-- **Passive, informational live analytics**
-- **Post-drive insights by default**
-- **Explicit privacy controls**
-- **App Store & Google Play compliant**
-
----
-
-## Key Features
-
-- Turn-by-turn navigation
-- Session-based trip recording
-- Route detection and normalization
-- Personal route efficiency references (“ghosts”)
-- Live efficiency delta (text-only, optional, non-interruptive)
-- Post-drive trip summaries and analytics
-- XP and progress tracking based on consistency and improvement (not speed)
-- Friends-only sharing (no public route leaderboards in MVP)
-
----
-
-## Safety & Compliance
-
-GhostRoute follows a Waze-style safety posture:
-
-- No racing or head-to-head driving mechanics
-- No speed-based prompts or alerts
-- No notifications requiring immediate action while driving
-- No animated or gamified overlays during navigation
-- Minimal, map-native UI elements only
-- All competitive interpretation occurs post-drive
-
-The app is explicitly designed to minimize cognitive load while driving.
-
----
-
-## Privacy & Data Handling
-
-- Location data is collected **only during active navigation sessions**
-- No always-on or idle background tracking
-- Default 90-day rolling retention for trip history
-- Users can:
-  - Delete individual trips
-  - Delete all history
-  - Export their data at any time
-- Raw location data is minimized and never sold or shared with third parties
-
----
-
-## Tech Stack
-
-- **Mobile:** Flutter (iOS & Android)
-- **Maps & Navigation:** Mapbox
-- **Backend:** Supabase (Postgres, Auth, Edge Functions)
-- **Notifications:** Post-drive only
-- **Analytics:** First-party, privacy-minimized
+- **No accounts** — nothing to sign up for, nothing tied to an identity
+- **On-device by default** — route scoring runs on the phone; the backend only proposes candidate routes
+- **Off by default** — trip history is opt-in; Emergency Share is a deliberate, per-trip action
+- **Ephemeral by design** — share sessions hard-expire at 12h; no durable coordinate storage server-side
+- **Transparent scoring** — every route score comes with a factor breakdown and a confidence disclosure
 
 ---
 
 ## Repository Structure
 
+```
+/apps/mobile       React Native (TypeScript) app — screens, navigation, local encrypted storage
+/apps/backend      Node.js/Fastify API — route proposals, Emergency Share sessions (Redis-backed)
+/packages/scoring  Shared route scoring engine used on-device and (for parity) on the server
+```
+
+See each package's README for details:
+
+- [apps/mobile/README.md](apps/mobile/README.md)
+- [apps/backend/README.md](apps/backend/README.md)
+- [packages/scoring/README.md](packages/scoring/README.md)
+
+---
+
+## Features (MVP)
+
+**Mobile**
+- Home screen: destination search + Fastest / Balanced / Safest mode selector
+- Route Options: 2-3 scored route cards (score badge, time, distance, one-line summary)
+- Route Explanation sheet: per-factor breakdown and confidence disclosure
+- Navigation screen: turn-by-turn, Share ETA, End Trip
+- Privacy Dashboard: exactly what's stored, with a Delete Everything button
+- Settings: default mode, emergency contact, history toggle (default OFF)
+- All prefs/history stored locally, encrypted at rest
+
+**Backend**
+- `POST /route` — origin/destination/mode/travel type → 2-3 scored routes
+- `POST /share` — create an Emergency Share session → token URL
+- `PUT /share/:token/position` — traveler posts live position
+- `GET /share/:token` — recipient view; `410 Gone` after expiry
+- Redis-backed share sessions, 12h hard TTL cap, rate-limited endpoints, coordinate scrubbing in logs
+
+**Scoring engine**
+- Weighted-sum scoring per route segment: time, path type, lighting proxy, openness
+- Three mode weight profiles: Fastest / Balanced / Safest
+- Confidence scoring that degrades gracefully when OSM tags are missing
+- 0-100 score + factor breakdown for the explanation card
+
+---
+
+## Getting Started
+
+```bash
+npm install
+npm run build   # compiles packages/scoring, which both apps depend on
+
+# Backend (requires a local Redis instance)
+npm run dev:backend
+
+# Mobile (Expo)
+npm run dev:mobile
+```
+
+## Privacy & Data Handling
+
+- No accounts, no login, no device fingerprinting
+- No third-party analytics or advertising SDKs of any kind
+- Trip history is disabled by default; when enabled, it is stored locally with encryption and never leaves the device
+- Emergency Share is opt-in per trip, auto-expires (12h hard cap), and is never written to durable storage server-side
+- Server logs scrub coordinates before they are written
+- Privacy Dashboard screen always shows exactly what is stored, with a one-tap "Delete Everything"
