@@ -11,7 +11,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.ghostroute.app",
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "GhostRoute uses your location only while navigating, to show turn-by-turn directions and, if you choose to Share ETA, your live position to whoever you send the link to.",
+        "NSLocationWhenInUseUsageDescription": "GhostRoute uses your location only while a trip is actively recording, to build your personal route history on this device and, if you choose to Share ETA, your live position to whoever you send the link to.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },

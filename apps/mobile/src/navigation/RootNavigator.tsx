@@ -1,9 +1,11 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../screens/HomeScreen";
-import RouteOptionsScreen from "../screens/RouteOptionsScreen";
-import RouteExplanationSheet from "../screens/RouteExplanationSheet";
-import NavigationScreen from "../screens/NavigationScreen";
+import RecordTripScreen from "../screens/RecordTripScreen";
+import TripSummaryScreen from "../screens/TripSummaryScreen";
+import SavedRoutesScreen from "../screens/SavedRoutesScreen";
+import GhostNavigationScreen from "../screens/GhostNavigationScreen";
+import ComparisonScreen from "../screens/ComparisonScreen";
 import PrivacyDashboardScreen from "../screens/PrivacyDashboardScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import { RootStackParamList } from "./types";
@@ -21,13 +23,19 @@ export default function RootNavigator() {
       }}
     >
       <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="RouteOptions" component={RouteOptionsScreen} options={{ title: "Route Options" }} />
+      <Stack.Screen name="RecordTrip" component={RecordTripScreen} options={{ title: "Record Trip" }} />
       <Stack.Screen
-        name="RouteExplanation"
-        component={RouteExplanationSheet}
-        options={{ presentation: "modal", title: "" }}
+        name="TripSummary"
+        component={TripSummaryScreen}
+        options={{ title: "Trip Summary", headerBackVisible: false }}
       />
-      <Stack.Screen name="Navigation" component={NavigationScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="SavedRoutes" component={SavedRoutesScreen} options={{ title: "Saved Routes" }} />
+      <Stack.Screen name="GhostNavigation" component={GhostNavigationScreen} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="Comparison"
+        component={ComparisonScreen}
+        options={{ title: "Trip Comparison", headerBackVisible: false }}
+      />
       <Stack.Screen name="PrivacyDashboard" component={PrivacyDashboardScreen} options={{ title: "Privacy" }} />
       <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: "Settings" }} />
     </Stack.Navigator>

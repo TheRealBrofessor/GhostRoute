@@ -1,5 +1,10 @@
 import { API_BASE_URL } from "../config";
-import { LatLon, RouteMode, RouteQuoteResponse, TravelMode } from "../types";
+import { LatLon } from "../types";
+
+/**
+ * The only network calls the app makes — all Emergency Share, all opt-in.
+ * Trip recording and ghost comparison are fully on-device.
+ */
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -19,18 +24,6 @@ export class ApiError extends Error {
   constructor(public status: number, body: string) {
     super(`Request failed (${status}): ${body}`);
   }
-}
-
-export function fetchRoutes(
-  origin: LatLon,
-  destination: LatLon,
-  mode: RouteMode,
-  travelMode: TravelMode
-): Promise<RouteQuoteResponse> {
-  return request<RouteQuoteResponse>("/route", {
-    method: "POST",
-    body: JSON.stringify({ origin, destination, mode, travelMode }),
-  });
 }
 
 export interface CreateShareResult {

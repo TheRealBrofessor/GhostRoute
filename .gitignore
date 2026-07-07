@@ -46,3 +46,6 @@ coverage/
 
 # Redis dump
 dump.rdb
+
+# Local Claude Code session config
+.claude/

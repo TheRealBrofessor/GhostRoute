@@ -2,14 +2,14 @@
   "name": "ghostroute",
   "version": "0.1.0",
   "private": true,
-  "description": "GhostRoute — privacy-first navigation with safety-aware route scoring",
+  "description": "GhostRoute — privacy-first personal reference-route navigation: record trips, save your most efficient run, and passively compare later drives against it",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "build": "npm run build --workspace packages/scoring && npm run build --workspace apps/backend --if-present",
-    "lint": "npm run build --workspace packages/scoring && npm run lint --workspaces --if-present",
+    "build": "npm run build --workspace packages/scoring --workspace packages/comparison && npm run build --workspace apps/backend --if-present",
+    "lint": "npm run build --workspace packages/scoring --workspace packages/comparison && npm run lint --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "dev:backend": "npm run dev --workspace apps/backend",
     "dev:mobile": "npm run start --workspace apps/mobile"

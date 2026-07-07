@@ -1,19 +1,12 @@
-import { Place, RouteMode, RouteOption, TravelMode } from "../types";
+import { TripComparison, TripRecord } from "../types";
 
 export type RootStackParamList = {
   Home: undefined;
-  RouteOptions: {
-    origin: { lat: number; lon: number };
-    destination: Place;
-    mode: RouteMode;
-    travelMode: TravelMode;
-  };
-  RouteExplanation: { route: RouteOption };
-  Navigation: {
-    destination: Place;
-    route: RouteOption;
-    mode: RouteMode;
-  };
+  RecordTrip: undefined;
+  TripSummary: { trip: TripRecord };
+  SavedRoutes: undefined;
+  GhostNavigation: { referenceId: string };
+  Comparison: { trip: TripRecord; comparison: TripComparison };
   PrivacyDashboard: undefined;
   Settings: undefined;
 };

@@ -1,32 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/types";
 import { usePreferencesStore } from "../state/preferencesStore";
-import { useTripHistoryStore } from "../state/tripHistoryStore";
+import { useTripsStore } from "../state/tripsStore";
 import { deleteEverything } from "../storage/secureStorage";
 import { colors, radii, spacing } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "PrivacyDashboard">;
 
 export default function PrivacyDashboardScreen({ navigation }: Props) {
-  const historyEnabled = usePreferencesStore((state) => state.historyEnabled);
   const emergencyContact = usePreferencesStore((state) => state.emergencyContact);
   const resetPreferences = usePreferencesStore((state) => state.reset);
-  const trips = useTripHistoryStore((state) => state.trips);
-  const loadTrips = useTripHistoryStore((state) => state.load);
-  const clearTrips = useTripHistoryStore((state) => state.clear);
+  const load = useTripsStore((state) => state.load);
+  const trips = useTripsStore((state) => state.trips);
+  const references = useTripsStore((state) => state.references);
+  const clearAll = useTripsStore((state) => state.clearAll);
   const [deleting, setDeleting] = useState(false);
 
-  useEffect(() => {
-    loadTrips();
-  }, [loadTrips]);
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
 
   function confirmDeleteEverything() {
     Alert.alert(
       "Delete everything?",
-      "This permanently removes your saved preferences and trip history from this device. This can't be undone.",
+      "This permanently removes your preferences, saved trips, and reference routes from this device. This can't be undone.",
       [
         { text: "Cancel", style: "cancel" },
         { text: "Delete Everything", style: "destructive", onPress: handleDeleteEverything },
@@ -39,7 +42,7 @@ export default function PrivacyDashboardScreen({ navigation }: Props) {
     try {
       await deleteEverything();
       resetPreferences();
-      await clearTrips();
+      await clearAll();
       navigation.popToTop();
     } finally {
       setDeleting(false);
@@ -53,21 +56,21 @@ export default function PrivacyDashboardScreen({ navigation }: Props) {
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>On this device</Text>
-        <Row label="Preferences" value="Mode default, travel type, emergency contact" />
+        <Row label="Saved trips (with location samples)" value={`${trips.length}`} />
+        <Row label="Reference routes" value={`${references.length}`} />
         <Row label="Emergency contact" value={emergencyContact || "Not set"} />
-        <Row label="Trip history" value={historyEnabled ? "On" : "Off (default)"} />
-        <Row label="Trips stored locally" value={`${trips.length}`} />
         <Text style={styles.note}>
-          All of the above is encrypted at rest via the OS keystore/keychain. Nothing here ever
-          leaves this device.
+          Trips are stored only when you tap Save after a drive, and location is sampled only while
+          a trip is actively recording. Trip data never leaves this device unless you explicitly
+          share it. The emergency contact is kept in the OS keystore/keychain.
         </Text>
       </View>
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>On GhostRoute's server</Text>
         <Row label="Accounts" value="None — GhostRoute has no login" />
-        <Row label="Route requests" value="Not retained after a response is sent" />
-        <Row label="Emergency Share" value="Live position only, auto-deleted within 12h" />
+        <Row label="Trips / reference routes" value="Never uploaded" />
+        <Row label="Emergency Share" value="Live position only, opt-in, auto-deleted within 12h" />
         <Row label="Analytics / ad SDKs" value="None" />
       </View>
 
@@ -76,9 +79,7 @@ export default function PrivacyDashboardScreen({ navigation }: Props) {
         onPress={confirmDeleteEverything}
         disabled={deleting}
       >
-        <Text style={styles.deleteButtonText}>
-          {deleting ? "Deleting…" : "Delete Everything"}
-        </Text>
+        <Text style={styles.deleteButtonText}>{deleting ? "Deleting…" : "Delete Everything"}</Text>
       </Pressable>
     </SafeAreaView>
   );

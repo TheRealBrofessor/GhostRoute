@@ -1,0 +1,9 @@
+{
+  "name": "@ghostroute/site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static marketing/demo page for GhostRoute — plain HTML, no build step",
+  "scripts": {
+    "dev": "npx serve ."
+  }
+}

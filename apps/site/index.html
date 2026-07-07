@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GhostRoute — your own drives, as your reference</title>
+  <meta name="description" content="GhostRoute records your regular drives, saves your most efficient trip as a personal reference route, and passively shows how today's drive compares. Private by design." />
+  <style>
+    :root {
+      --bg: #0f1115;
+      --surface: #1a1d24;
+      --border: #2e333d;
+      --text: #f2f3f5;
+      --muted: #9aa1ac;
+      --accent: #3ddc97;
+      --warning: #e0a93d;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6;
+    }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 24px 96px; }
+    h1 { font-size: 2.4rem; letter-spacing: -0.02em; }
+    h2 { margin: 48px 0 12px; font-size: 1.3rem; }
+    p { color: var(--muted); margin: 12px 0; }
+    .tagline { font-size: 1.15rem; color: var(--text); }
+    .badge {
+      display: inline-block; margin: 16px 8px 0 0; padding: 4px 12px;
+      border: 1px solid var(--border); border-radius: 999px;
+      color: var(--muted); font-size: 0.8rem;
+    }
+    .badge.accent { color: var(--accent); border-color: var(--accent); }
+    .badge.warning { color: var(--warning); border-color: var(--warning); }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px 24px; margin: 16px 0;
+    }
+    .delta {
+      font-size: 1.6rem; font-weight: 800; text-align: center;
+      padding: 24px; letter-spacing: 0.01em;
+    }
+    .delta small { display: block; font-size: 0.8rem; font-weight: 400; color: var(--muted); margin-top: 4px; }
+    ul { color: var(--muted); padding-left: 20px; }
+    li { margin: 6px 0; }
+    footer { margin-top: 64px; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--border); padding-top: 24px; }
+    a { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>GhostRoute</h1>
+    <p class="tagline">
+      Record your regular drives. Save your most efficient trip as a personal reference route.
+      Then quietly see how today's drive compares — no accounts, no cloud trip history.
+    </p>
+    <span class="badge accent">iPhone</span>
+    <span class="badge accent">Android</span>
+    <span class="badge warning">MVP / demo status</span>
+
+    <h2>A passive ghost reference, not a race</h2>
+    <div class="card delta">
+      +0:42 behind reference
+      <small>the only thing GhostRoute shows while you drive</small>
+    </div>
+    <p>
+      During a drive, GhostRoute shows a simple progress indicator for your saved reference trip
+      and a real-time <strong>+/- time</strong> comparison based on route progress. That's it.
+      No alerts, no rewards, no prompts to speed up, no competitive language — the comparison
+      measures route efficiency (when you left, which way you went, where time is typically lost),
+      never how fast you're moving right now. The detailed breakdown — segment-by-segment deltas,
+      consistency score, route notes — waits until the drive has ended.
+    </p>
+
+    <h2>Private by design</h2>
+    <ul>
+      <li>No accounts, no third-party analytics, no ad SDKs.</li>
+      <li>Trips and location samples are stored only on your device, and only when you explicitly save them.</li>
+      <li>Location is sampled only while a trip is actively recording.</li>
+      <li>Delete any trip — or everything — in one tap from the Privacy Dashboard.</li>
+      <li>Optional Emergency Share (live ETA link) is opt-in per trip and hard-expires within 12 hours, server-side.</li>
+    </ul>
+
+    <h2>Safety posture</h2>
+    <p>
+      GhostRoute is deliberately not a racing or gamified driving app. There is no scoreboard, no
+      "beat your time" prompt, and nothing that demands attention while driving. Post-drive
+      insights describe where time differed; they never encourage unsafe driving.
+    </p>
+
+    <h2>Status</h2>
+    <p>
+      GhostRoute is an MVP. It ships with a keyless demo mode (simulated drives on sample routes)
+      so everything works without API keys; live geocoding/routing providers (Mapbox, Google
+      Routes, OSRM) plug in behind a provider interface and are on the roadmap.
+    </p>
+
+    <footer>
+      GhostRoute MVP — source at <a href="https://github.com/TheRealBrofessor/GhostRoute">github.com/TheRealBrofessor/GhostRoute</a>.
+    </footer>
+  </main>
+</body>
+</html>

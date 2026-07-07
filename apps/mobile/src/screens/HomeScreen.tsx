@@ -1,100 +1,77 @@
-import React, { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import React, { useCallback } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import ModeSelector from "../components/ModeSelector";
+import { useFocusEffect } from "@react-navigation/native";
 import { RootStackParamList } from "../navigation/types";
-import { usePreferencesStore } from "../state/preferencesStore";
-import { RouteMode, TravelMode } from "../types";
-import { geocode } from "../utils/geocode";
-import { getCurrentLocation } from "../utils/location";
+import { activeReference, useTripsStore } from "../state/tripsStore";
+import { formatDistance, formatDuration } from "../utils/format";
 import { colors, radii, spacing } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Home">;
 
-const TRAVEL_MODES: { key: TravelMode; label: string }[] = [
-  { key: "walk", label: "Walk" },
-  { key: "bike", label: "Bike" },
-  { key: "drive", label: "Drive" },
-];
-
 export default function HomeScreen({ navigation }: Props) {
-  const defaultMode = usePreferencesStore((state) => state.defaultMode);
-  const [destinationQuery, setDestinationQuery] = useState("");
-  const [mode, setMode] = useState<RouteMode>(defaultMode);
-  const [travelMode, setTravelMode] = useState<TravelMode>("drive");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const load = useTripsStore((state) => state.load);
+  const reference = useTripsStore(activeReference);
+  const referenceCount = useTripsStore((state) => state.references.length);
+  const tripCount = useTripsStore((state) => state.trips.length);
 
-  async function handleFindRoutes() {
-    if (!destinationQuery.trim()) {
-      setError("Enter a destination first.");
-      return;
-    }
-    setError(null);
-    setLoading(true);
-    try {
-      const [origin, destination] = await Promise.all([
-        getCurrentLocation(),
-        geocode(destinationQuery),
-      ]);
-
-      if (!origin) {
-        setError("GhostRoute needs location access to find routes from where you are.");
-        return;
-      }
-
-      navigation.navigate("RouteOptions", { origin, destination, mode, travelMode });
-    } finally {
-      setLoading(false);
-    }
-  }
+  useFocusEffect(
+    useCallback(() => {
+      load();
+    }, [load])
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>GhostRoute</Text>
-      <Text style={styles.subtitle}>Where are you headed?</Text>
+      <Text style={styles.subtitle}>
+        Record your regular drives, save your most efficient trip as a reference, and quietly see
+        how today's drive compares.
+      </Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Search destination"
-        placeholderTextColor={colors.textMuted}
-        value={destinationQuery}
-        onChangeText={setDestinationQuery}
-        returnKeyType="search"
-        onSubmitEditing={handleFindRoutes}
-      />
+      {reference ? (
+        <View style={styles.referenceCard}>
+          <Text style={styles.referenceLabel}>Active reference route</Text>
+          <Text style={styles.referenceName}>{reference.name}</Text>
+          <Text style={styles.referenceMeta}>
+            {formatDistance(reference.trip.distanceMeters)} · {formatDuration(reference.trip.durationSeconds)}
+            {reference.trip.isDemo ? " · demo trip" : ""}
+          </Text>
+        </View>
+      ) : (
+        <View style={styles.referenceCard}>
+          <Text style={styles.referenceLabel}>No reference route yet</Text>
+          <Text style={styles.referenceMeta}>
+            Record a trip first, then save it as your reference to compare later drives against it.
+          </Text>
+        </View>
+      )}
 
-      <Text style={styles.sectionLabel}>Mode</Text>
-      <ModeSelector value={mode} onChange={setMode} />
-
-      <Text style={styles.sectionLabel}>Travel type</Text>
-      <View style={styles.travelRow}>
-        {TRAVEL_MODES.map(({ key, label }) => {
-          const selected = key === travelMode;
-          return (
-            <Pressable
-              key={key}
-              onPress={() => setTravelMode(key)}
-              style={[styles.travelChip, selected && styles.travelChipSelected]}
-            >
-              <Text style={[styles.travelChipText, selected && styles.travelChipTextSelected]}>
-                {label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
-      {error && <Text style={styles.error}>{error}</Text>}
+      <Pressable style={styles.primaryButton} onPress={() => navigation.navigate("RecordTrip")}>
+        <Text style={styles.primaryButtonText}>Record a Trip</Text>
+      </Pressable>
 
       <Pressable
-        style={[styles.cta, loading && styles.ctaDisabled]}
-        onPress={handleFindRoutes}
-        disabled={loading}
+        style={[styles.secondaryButton, !reference && styles.buttonDisabled]}
+        disabled={!reference}
+        onPress={() => reference && navigation.navigate("GhostNavigation", { referenceId: reference.id })}
       >
-        <Text style={styles.ctaText}>{loading ? "Finding routes…" : "Find Routes"}</Text>
+        <Text style={styles.secondaryButtonText}>
+          {reference ? "Drive vs. Reference" : "Drive vs. Reference (save a reference first)"}
+        </Text>
       </Pressable>
+
+      <Pressable style={styles.secondaryButton} onPress={() => navigation.navigate("SavedRoutes")}>
+        <Text style={styles.secondaryButtonText}>
+          Saved Routes ({referenceCount} reference{referenceCount === 1 ? "" : "s"}, {tripCount} trip
+          {tripCount === 1 ? "" : "s"})
+        </Text>
+      </Pressable>
+
+      <Text style={styles.privacyNote}>
+        Trips are stored only on this device, and only when you choose to save them.
+      </Text>
 
       <View style={styles.footerLinks}>
         <Pressable onPress={() => navigation.navigate("Settings")}>
@@ -111,40 +88,37 @@ export default function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.lg, gap: spacing.md },
   title: { color: colors.text, fontSize: 28, fontWeight: "800", marginTop: spacing.md },
-  subtitle: { color: colors.textMuted, fontSize: 15, marginBottom: spacing.sm },
-  input: {
+  subtitle: { color: colors.textMuted, fontSize: 14, lineHeight: 20 },
+  referenceCard: {
     backgroundColor: colors.surface,
     borderRadius: radii.md,
     borderWidth: 1,
     borderColor: colors.border,
-    color: colors.text,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm + 4,
-    fontSize: 16,
+    padding: spacing.md,
+    gap: spacing.xs,
   },
-  sectionLabel: { color: colors.textMuted, fontSize: 13, fontWeight: "600", marginTop: spacing.sm },
-  travelRow: { flexDirection: "row", gap: spacing.sm },
-  travelChip: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.md,
-    borderRadius: radii.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  travelChipSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
-  travelChipText: { color: colors.textMuted, fontWeight: "600" },
-  travelChipTextSelected: { color: colors.background },
-  error: { color: colors.danger, fontSize: 13 },
-  cta: {
-    marginTop: spacing.md,
+  referenceLabel: { color: colors.accent, fontSize: 12, fontWeight: "700", textTransform: "uppercase" },
+  referenceName: { color: colors.text, fontSize: 18, fontWeight: "700" },
+  referenceMeta: { color: colors.textMuted, fontSize: 13, lineHeight: 18 },
+  primaryButton: {
     backgroundColor: colors.accent,
     paddingVertical: spacing.md,
     borderRadius: radii.md,
     alignItems: "center",
   },
-  ctaDisabled: { opacity: 0.6 },
-  ctaText: { color: colors.background, fontWeight: "800", fontSize: 16 },
+  primaryButtonText: { color: colors.background, fontWeight: "800", fontSize: 16 },
+  secondaryButton: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: spacing.md,
+    borderRadius: radii.md,
+    alignItems: "center",
+    paddingHorizontal: spacing.md,
+  },
+  secondaryButtonText: { color: colors.text, fontWeight: "700", textAlign: "center" },
+  buttonDisabled: { opacity: 0.5 },
+  privacyNote: { color: colors.textMuted, fontSize: 12, textAlign: "center" },
   footerLinks: {
     marginTop: "auto",
     flexDirection: "row",
